@@ -31,38 +31,41 @@ st.sidebar.markdown("* Go to **Settings** and then **Access Tokens**")
 st.sidebar.markdown("* Create a new Token (select 'read' role)")
 st.sidebar.markdown("* Paste your API key in the text box")
 st.sidebar.divider()
-st.sidebar.markdown("Please make sure your article is in English and is not behind a paywall.")
-st.sidebar.write("\n\n")
+st.sidebar.caption("Please make sure your article is in English and is not behind a paywall.")
+st.sidebar.write("\n\n\n")
 st.sidebar.info("Created by [Ivan Lee](https://ivan-lee.medium.com/) using [Streamlit](https://streamlit.io/)🎈.")
 
 
 # Inputs 
 st.subheader("Enter the URL of the article you want to summarize")
-default_url = "https://www.reuters.com/technology/un-recruits-robots-strive-meet-global-development-goals-2023-07-05/"
+default_url = "https://"
 url = st.text_input("URL:", default_url)
 
 headers_ = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'
     }
 
-article_url = url
-session = requests.Session()
+fetch_button = st.button("Fetch article")
 
-try:
-    response_ = session.get(article_url, headers=headers_, timeout=10)
+if fetch_button:
+    article_url = url
+    session = requests.Session()
+
+    try:
+        response_ = session.get(article_url, headers=headers_, timeout=10)
     
-    if response_.status_code == 200:
-        article = Article(article_url)
-        article.download()
-        article.parse()
-        
-        title = article.title
-        text = article.text
-        
-    else:
-        st.write("Failed to fetch article, please check URL...")
-except Exception as e:
-    st.write(f"Error occurred while fetching article: {e}")
+        if response_.status_code == 200:
+
+            with st.spinner('Fetching your article...'):
+                time.sleep(3)
+                st.success('Your article is ready for summarization!')
+
+        else:
+            st.write("Error occurred while fetching article.")
+
+    except Exception as e:
+        st.write(f"Error occurred while fetching article: {e}")
+
 
 # HuggingFace API KEY
 API_KEY = st.text_input("Enter your HuggingFace API key", type="password")
@@ -75,22 +78,29 @@ headers = {"Authorization": f"Bearer {API_KEY}"}
 
 submit_button = st.button("Submit")
 
-# Summary
+# Summarization
 if submit_button:
+    article = Article(url)
+    article.download()
+    article.parse()
 
+    title = article.title
+    text = article.text
+
+    with st.spinner('Doing some AI magic, please wait...'):
+        time.sleep(3)
+
+    # Query the API
     def query(payload):
         response = requests.post(API_URL, headers=headers, json=payload)
         return response.json()
-
+    
     st.session_state["valid_inputs_received"] = True
     output = query({"inputs": text, })
     summary = output[0]['summary_text'].replace('<n>', " ")
 
-    with st.spinner('Doing AI magic, please wait...'):
-        time.sleep(5)
-    st.success('Done!')
-
+    # Display the results
     st.divider()
     st.subheader("Summary")
-    st.write("Your article: ", title)
+    st.write("**Your article:** ", title)
     st.write(summary)
