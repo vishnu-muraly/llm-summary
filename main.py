@@ -16,9 +16,6 @@ with c2:
 
 st.markdown("**Generate summaries of online articles using abstractive summarization with Google's PEGASUS model.**")
 
-if not "valid_inputs_received" in st.session_state:
-    st.session_state["valid_inputs_received"] = False
-    st.stop()
 
 # Sidebar content
 st.sidebar.subheader("About the app")
@@ -31,9 +28,10 @@ st.sidebar.markdown("* Go to **Settings** and then **Access Tokens**")
 st.sidebar.markdown("* Create a new Token (select 'read' role)")
 st.sidebar.markdown("* Paste your API key in the text box")
 st.sidebar.divider()
-st.sidebar.caption("Please make sure your article is in English and is not behind a paywall.")
-st.sidebar.write("\n\n\n")
-st.sidebar.info("Created by [Ivan Lee](https://ivan-lee.medium.com/) using [Streamlit](https://streamlit.io/)🎈.")
+st.sidebar.write("Please make sure your article is in English and is not behind a paywall.")
+st.sidebar.write("\n\n")
+st.sidebar.divider()
+st.sidebar.caption("Created by [Ivan Lee](https://ivan-lee.medium.com/) using [Streamlit](https://streamlit.io/)🎈.")
 
 
 # Inputs 
@@ -88,14 +86,14 @@ if submit_button:
     text = article.text
 
     with st.spinner('Doing some AI magic, please wait...'):
-        time.sleep(3)
+        time.sleep(5)
+        st.success('Done!')
 
     # Query the API
     def query(payload):
         response = requests.post(API_URL, headers=headers, json=payload)
         return response.json()
     
-    st.session_state["valid_inputs_received"] = True
     output = query({"inputs": text, })
     summary = output[0]['summary_text'].replace('<n>', " ")
 
