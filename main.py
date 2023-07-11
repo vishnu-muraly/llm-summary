@@ -5,7 +5,7 @@ import time
 from newspaper import Article
 
 
-# Page layout
+# Page title layout
 c1, c2 = st.columns([0.32, 2])
 
 with c1:
@@ -65,7 +65,7 @@ if fetch_button:
         st.write(f"Error occurred while fetching article: {e}")
 
 
-# HuggingFace API KEY
+# HuggingFace API KEY input
 API_KEY = st.text_input("Enter your HuggingFace API key", type="password")
 
 # HuggingFace API inference URL.
@@ -76,7 +76,7 @@ headers = {"Authorization": f"Bearer {API_KEY}"}
 
 submit_button = st.button("Submit")
 
-# Summarization
+# Download and parse the article
 if submit_button:
     article = Article(url)
     article.download()
@@ -85,20 +85,21 @@ if submit_button:
     title = article.title
     text = article.text
 
-    with st.spinner('Doing some AI magic, please wait...'):
-        time.sleep(5)
-        st.success('Done!')
-
-    # Query the API
+    # HuggingFace API request function
     def query(payload):
         response = requests.post(API_URL, headers=headers, json=payload)
         return response.json()
     
-    output = query({"inputs": text, })
-    summary = output[0]['summary_text'].replace('<n>', " ")
+    with st.spinner('Doing some AI magic, please wait...'):
+        time.sleep(1)
 
-    # Display the results
-    st.divider()
-    st.subheader("Summary")
-    st.write("**Your article:** ", title)
-    st.write(summary)
+        # Query the API
+        output = query({"inputs": text, })
+
+       # Display the results
+        summary = output[0]['summary_text'].replace('<n>', " ") 
+
+        st.divider()
+        st.subheader("Summary")
+        st.write(f"Your article: **{title}**")
+        st.write(f"**{summary}**")
