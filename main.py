@@ -14,7 +14,7 @@ with c1:
 with c2:
     st.title("FastNews Article Summarizer")
 
-st.markdown("**Generate summaries of online articles using abstractive summarization with Google's PEGASUS model.**")
+st.markdown("**Generate summaries of articles and blog posts using abstractive summarization with Google's Pegasus language model.**")
 
 
 # Sidebar content
